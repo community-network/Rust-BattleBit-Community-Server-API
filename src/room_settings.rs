@@ -54,18 +54,41 @@ impl RoomSettings {
 
     pub fn read(&mut self, mut stream: read_stream::Stream) {
         self.damage_multiplier = stream.read_float();
-        self.bleeding_enabled = stream.read_bool();
-        self.stamine_enabled = stream.read_bool();
-        self.friendly_fire_enabled = stream.read_bool();
-        self.hide_map_votes = stream.read_bool();
-        self.only_winner_team_can_vote = stream.read_bool();
-        self.hit_markers_enabled = stream.read_bool();
-        self.point_log_enabled = stream.read_bool();
-        self.spectator_enabled = stream.read_bool();
-
-        self.medic_limit_per_squad = stream.read();
-        self.engineer_limit_per_squad = stream.read();
-        self.support_limit_per_squad = stream.read();
-        self.recon_limit_per_squad = stream.read();
+        if let Some(val) = stream.read_bool() {
+            self.bleeding_enabled = val;
+        }
+        if let Some(val) = stream.read_bool() {
+            self.stamine_enabled = val;
+        }
+        if let Some(val) = stream.read_bool() {
+            self.friendly_fire_enabled = val;
+        }
+        if let Some(val) = stream.read_bool() {
+            self.hide_map_votes = val;
+        }
+        if let Some(val) = stream.read_bool() {
+            self.only_winner_team_can_vote = val;
+        }
+        if let Some(val) = stream.read_bool() {
+            self.hit_markers_enabled = val;
+        }
+        if let Some(val) = stream.read_bool() {
+            self.point_log_enabled = val;
+        }
+        if let Some(val) = stream.read_bool() {
+            self.spectator_enabled = val;
+        }
+        if let Some(val) = stream.read() {
+            self.medic_limit_per_squad = val;
+        }
+        if let Some(val) = stream.read() {
+            self.engineer_limit_per_squad = val;
+        }
+        if let Some(val) = stream.read() {
+            self.support_limit_per_squad = val;
+        }
+        if let Some(val) = stream.read() {
+            self.recon_limit_per_squad = val;
+        }
     }
 }

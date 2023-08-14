@@ -16,13 +16,13 @@ impl Stream {
 
     pub fn next_item(&mut self, size: u32) -> Vec<u8> {
         let binding = self.buffer.clone();
-        let (current, buf) = binding.split_at(size.try_into().unwrap());
+        let (current, buf) = binding.split_at(size.try_into().unwrap_or(0));
         self.buffer = buf.to_vec();
         current.to_vec()
     }
 
-    pub fn read(&mut self) -> u8 {
-        *self.next_item(1).first().unwrap()
+    pub fn read(&mut self) -> Option<u8> {
+        self.next_item(1).first().copied()
     }
 
     pub fn read_u16(&mut self) -> u16 {
@@ -33,8 +33,11 @@ impl Stream {
         LittleEndian::read_u32(&self.next_item(4))
     }
 
-    pub fn read_bool(&mut self) -> bool {
-        *self.next_item(1).first().unwrap() == 1
+    pub fn read_bool(&mut self) -> Option<bool> {
+        match self.next_item(1).first() {
+            Some(item) => Some(*item == 1),
+            None => None,
+        }
     }
 
     pub fn read_float(&mut self) -> f32 {

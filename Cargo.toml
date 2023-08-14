@@ -12,3 +12,7 @@ num = "0.4"
 num-derive = "0.4"
 num-traits = "0.2"
 byteorder = "1.4"
+anyhow = "1.0"
+
+[profile.dev]
+overflow-checks = false
