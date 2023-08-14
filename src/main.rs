@@ -1,5 +1,5 @@
 use std::{
-    io::Read,
+    io::{Read, Write},
     net::{IpAddr, SocketAddr, TcpListener, TcpStream},
 };
 
@@ -14,7 +14,7 @@ pub mod enums;
 pub mod read_stream;
 pub mod room_settings;
 
-fn handle_client(addr: SocketAddr, mut stream: TcpStream) -> anyhow::Result<()> {
+fn handle_client(addr: SocketAddr, mut stream: &TcpStream) -> anyhow::Result<()> {
     let buf: &mut Vec<u8> = &mut vec![];
     if let Ok(buf_size) = stream.read_to_end(buf) {
         let mut stream_buf = read_stream::Stream::new(buf.to_vec());
@@ -91,9 +91,9 @@ fn handle_client(addr: SocketAddr, mut stream: TcpStream) -> anyhow::Result<()> 
         };
         #[allow(arithmetic_overflow)]
         let hash = (port as u32) << 32 | u32::from_le_bytes(ip_bytes.try_into().unwrap());
-        println!("{:#?}", hash);
+        // println!("{:#?}", hash);
 
-        let room_size = stream_buf.read_u32();
+        let room_size: u32 = stream_buf.read_u32();
         let mut room_settings = RoomSettings::new();
         room_settings.read(read_stream::Stream::new(stream_buf.next_item(room_size)));
         println!("room_settings: {:#?}", room_settings);
@@ -122,8 +122,12 @@ fn main() -> std::io::Result<()> {
     let listener = TcpListener::bind("0.0.0.0:29294")?;
 
     // accept connections and process them serially
-    while let Ok((stream, addr)) = listener.accept() {
-        handle_client(addr, stream);
+    while let Ok((mut stream, addr)) = listener.accept() {
+        if let Err(e) = handle_client(addr, &stream) {
+            let _ = stream.write_u8(NetworkCommunication::Denied as u8);
+            let _ = stream.write_all(e.to_string().as_bytes());
+            let _ = stream.flush();
+        }
     }
     Ok(())
 }
